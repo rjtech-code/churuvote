@@ -1,0 +1,385 @@
+/*
+ * Soft, rounded styles for the RO guide's verbatim content (Hindi and English HTML from
+ * the data layer). Class names come from the source markup; everything is scoped to .ref.
+ */
+
+.ref {
+  font-size: 1rem;
+  line-height: 1.75;
+}
+.ref p {
+  margin: 0.65rem 0;
+  max-width: 70ch;
+}
+.ref h3 {
+  margin: 1.8rem 0 0.5rem;
+  font-size: 1.12rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+.ref h4 {
+  margin: 0 0 0.3rem;
+  font-weight: 700;
+}
+.ref ul {
+  margin: 0.6rem 0;
+  padding-left: 1.25rem;
+  list-style: disc;
+  max-width: 72ch;
+}
+.ref li {
+  margin: 0.35rem 0;
+}
+.ref li::marker {
+  color: var(--c-teal);
+}
+.ref a:not(.btn) {
+  color: var(--c-accent);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--c-accent) 35%, transparent);
+  text-underline-offset: 3px;
+}
+.ref b,
+.ref strong {
+  font-weight: 700;
+}
+.ref .fineprint {
+  font-size: 0.86rem;
+  color: var(--c-muted);
+}
+.ref .mt {
+  margin-top: 0.75rem;
+}
+
+.ref .rule {
+  display: inline-block;
+  white-space: nowrap;
+  padding: 0 0.4em;
+  border-radius: 6px;
+  background: var(--c-accent-soft);
+  color: var(--c-accent);
+  font-family: var(--c-mono);
+  font-size: 0.78em;
+}
+
+/* tables: rounded frame, soft header, horizontal scroll inside the frame */
+.ref .tw {
+  position: relative;
+  overflow-x: auto;
+  margin: 1.1rem 0;
+  border: 1px solid var(--c-line);
+  border-radius: 14px;
+  background: var(--c-surface);
+}
+.ref table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.94rem;
+}
+.ref th,
+.ref td {
+  padding: 0.65rem 0.9rem;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--c-line);
+}
+.ref th {
+  background: var(--c-surface-2);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--c-muted);
+  white-space: nowrap;
+}
+.ref tbody tr:last-child td {
+  border-bottom: 0;
+}
+.ref tbody tr {
+  transition: background-color 150ms;
+}
+.ref tbody tr:hover td {
+  background: var(--c-accent-soft);
+}
+.ref td.pg {
+  font-family: var(--c-mono);
+  font-size: 0.85rem;
+  white-space: nowrap;
+  color: var(--c-warn);
+}
+
+/* callouts: soft tinted rounded panels */
+.ref .note {
+  margin: 1.2rem 0;
+  max-width: 74ch;
+  padding: 0.85rem 1.1rem;
+  border-radius: 14px;
+  background: var(--c-accent-soft);
+}
+.ref .note p {
+  margin: 0.2rem 0;
+}
+.ref .note strong.t {
+  display: block;
+  margin-bottom: 0.15rem;
+  font-size: 0.84rem;
+  color: var(--c-accent);
+}
+.ref .note.warn {
+  background: var(--c-warn-soft);
+}
+.ref .note.warn strong.t {
+  color: var(--c-warn);
+}
+.ref .note.bad {
+  background: var(--c-bad-soft);
+}
+.ref .note.bad strong.t {
+  color: var(--c-bad);
+}
+.ref .note.ok {
+  background: var(--c-ok-soft);
+}
+.ref .note.ok strong.t {
+  color: var(--c-ok);
+}
+
+/* distinct pieces of information */
+.ref .grid {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1.1rem 0;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+}
+.ref .card {
+  min-width: 0;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--c-line);
+  border-radius: 14px;
+  background: var(--c-surface);
+}
+.ref .card p {
+  margin: 0.3rem 0;
+  font-size: 0.94rem;
+}
+.ref .big {
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--c-accent);
+}
+
+/* numbered process */
+.ref .flow {
+  display: grid;
+  max-width: 720px;
+  margin: 1.1rem 0;
+}
+.ref .step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr);
+  column-gap: 0.9rem;
+}
+.ref .step::before {
+  content: '';
+  position: absolute;
+  left: calc(1.125rem - 1px);
+  top: 2.25rem;
+  bottom: 0;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--c-line-strong);
+}
+.ref .step:last-child::before {
+  display: none;
+}
+.ref .step .dot {
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  background: var(--c-accent-soft);
+  color: var(--c-accent);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.ref .step.end .dot {
+  background: var(--c-ok-soft);
+  color: var(--c-ok);
+}
+.ref .step .body {
+  min-width: 0;
+  padding: 0.35rem 0 1.15rem;
+}
+.ref .step .body > span {
+  display: block;
+  color: var(--c-muted);
+  font-size: 0.93rem;
+}
+.ref .fork {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  max-width: 520px;
+  margin-top: 0.5rem;
+}
+@media (max-width: 480px) {
+  .ref .fork {
+    grid-template-columns: 1fr;
+  }
+}
+.ref .fork div {
+  padding: 0.55rem 0.85rem;
+  border-radius: 12px;
+  font-size: 0.93rem;
+}
+.ref .fork .y {
+  background: var(--c-ok-soft);
+  color: var(--c-ok);
+}
+.ref .fork .n {
+  background: var(--c-accent-soft);
+  color: var(--c-accent);
+}
+
+/* 19(gg) ladder */
+.ref .ladder {
+  display: grid;
+  gap: 0.5rem;
+  margin: 1.1rem 0;
+}
+.ref .rung {
+  display: grid;
+  grid-template-columns: 9rem minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 0.25rem 1rem;
+  align-items: center;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--c-line);
+  border-radius: 12px;
+  background: var(--c-surface);
+}
+@media (max-width: 700px) {
+  .ref .rung {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* status pills */
+.ref .pill {
+  display: inline-block;
+  padding: 0.05rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.ref .pill.no {
+  background: var(--c-bad-soft);
+  color: var(--c-bad);
+}
+.ref .pill.mid {
+  background: var(--c-warn-soft);
+  color: var(--c-warn);
+}
+.ref .pill.yes {
+  background: var(--c-ok-soft);
+  color: var(--c-ok);
+}
+
+/* order templates */
+.ref .order {
+  margin: 1.1rem 0;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--c-line);
+  border-radius: 16px;
+  background: var(--c-surface);
+}
+.ref .order h3 {
+  margin-top: 0;
+}
+.ref .order blockquote {
+  max-width: 74ch;
+  margin: 0.5rem 0 0.85rem;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  background: var(--c-surface-2);
+}
+.ref .btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.25rem;
+  margin-right: 0.5rem;
+  padding: 0 0.9rem;
+  border: 0;
+  border-radius: 10px;
+  background: var(--c-accent);
+  color: var(--c-accent-ink);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 150ms;
+}
+.ref .btn:hover {
+  background: var(--c-accent-strong);
+}
+
+/* accordions */
+.ref details {
+  max-width: 900px;
+  margin: 0.5rem 0;
+  border: 1px solid var(--c-line);
+  border-radius: 14px;
+  background: var(--c-surface);
+  transition: border-color 150ms, box-shadow 150ms;
+}
+.ref details:hover {
+  border-color: var(--c-line-strong);
+}
+.ref details[open] {
+  border-color: color-mix(in srgb, var(--c-accent) 40%, var(--c-line));
+  box-shadow: var(--c-shadow);
+}
+.ref summary {
+  display: grid;
+  grid-template-columns: 2.2rem minmax(0, 1fr) 1.6rem;
+  gap: 0.5rem;
+  align-items: start;
+  padding: 0.75rem 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+.ref summary::-webkit-details-marker {
+  display: none;
+}
+.ref summary::after {
+  content: '+';
+  display: grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 999px;
+  background: var(--c-accent-soft);
+  color: var(--c-accent);
+  font-weight: 700;
+}
+.ref details[open] summary::after {
+  content: '\2212';
+}
+.ref summary .n {
+  padding-top: 0.15rem;
+  font-family: var(--c-mono);
+  font-size: 0.8rem;
+  color: var(--c-muted);
+}
+.ref details .a {
+  padding: 0 1rem 1rem 3.6rem;
+}
+@media (max-width: 560px) {
+  .ref details .a {
+    padding-left: 1rem;
+  }
+}
