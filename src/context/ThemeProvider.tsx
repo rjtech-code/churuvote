@@ -11,7 +11,7 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null)
 
-/** The inline script in index.html applies the saved/system theme before first paint; start from that. */
+/** The inline script in index.html applies the saved theme (light by default) before first paint; start from that. */
 const initial = (): Theme => (document.documentElement.classList.contains('dark') ? 'dark' : 'light')
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
@@ -19,15 +19,18 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
+  }, [theme])
+
+  // Only an explicit choice is saved, so first-time visitors always start in light mode.
+  const setTheme = useCallback((t: Theme) => {
+    setThemeState(t)
     try {
-      localStorage.setItem(STORAGE_KEY, theme)
+      localStorage.setItem(STORAGE_KEY, t)
     } catch {
       // storage unavailable; theme still applies for this visit
     }
-  }, [theme])
-
-  const setTheme = useCallback((t: Theme) => setThemeState(t), [])
-  const toggle = useCallback(() => setThemeState((t) => (t === 'dark' ? 'light' : 'dark')), [])
+  }, [])
+  const toggle = useCallback(() => setTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark'), [setTheme])
   const value = useMemo(() => ({ theme, setTheme, toggle }), [theme, setTheme, toggle])
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>

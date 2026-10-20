@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router'
 import { scrollToId } from '../lib/hooks'
 import { DisclaimerText, SiteHeader } from './SiteHeader'
 import { SiteFooter } from './SiteFooter'
+import { BackToTop } from './BackToTop'
 
 /** Scrolls to the URL hash target after navigation, or to the top for plain page changes. */
 function ScrollManager() {
@@ -36,6 +37,7 @@ export function SiteShell() {
         <Outlet />
       </main>
       <SiteFooter />
+      <BackToTop />
     </div>
   )
 }

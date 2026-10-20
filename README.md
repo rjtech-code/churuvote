@@ -29,12 +29,30 @@ into `dist/`. Some free hosts limit total size, so check yours.
 
 ## Design
 
-A soft, rounded, light interface:
-- **Header:** a sticky horizontal bar with the "S" logo, the name and subtitle on the left, navigation in the centre, and the language and theme toggles on the right. On mobile, a compact menu holds the navigation (and the theme toggle on the smallest screens).
-- **Palette:** calm blue (`#3976D2`) and soft teal (`#73B7A5`) accents on `#F7F8FC`, with a coordinated navy dark mode. All colours are CSS variables in `src/index.css`, exposed as Tailwind tokens (`bg-surface`, `text-accent`, `bg-teal-soft`, …).
-- **Components:** rounded panels (`.panel`), pill filters (`FilterPills`), a rounded search field, compact rounded document rows with gentle hover, and accordion FAQs.
-- **Motion:** transitions only (colour, border and a 2 px lift on homepage panels). Everything respects `prefers-reduced-motion`.
-- **Fonts:** Inter plus Noto Sans Devanagari.
+Minimal and interactive: show less at first and reveal more when the user interacts.
+- **Light mode by default** for every new visitor, whatever the OS setting. Dark mode is saved only after the visitor chooses it with the toggle.
+- **Header:** sticky and compact, with the "S" logo, name and subtitle, the four sections, and the हिन्दी/English and theme toggles. On phones it collapses into a menu.
+- **Compact page hero** (`CompactHero`): title, a 1–2 line description, one stats row, at most two actions.
+- **Homepage flip cards** (`FlipCard`, only these four cards): the front shows an icon and title; the back shows the description, count and one action.
+  - Flips on hover with a mouse, on tap on touch screens (tap outside to flip back), or with Enter/Space from the keyboard (Escape returns).
+  - The hidden face is `inert`, so screen readers and Tab only reach the visible side.
+  - With reduced motion it cross-fades instead of rotating.
+- **Document browser** (`DocumentBrowser`): a compact toolbar with search, a Grid/Table switch, an election segment, scrollable type pills and a live count. **Table view is the default**; Grid view is one click away.
+  - Cards: real preview, title, one meta line, small actions. 1/2/3 columns (never more than 3).
+  - Switching views keeps the search and filters. Lists fade in briefly when filters change.
+- **Hero visuals** (`HeroVisuals.tsx`), one per page, all built from real data:
+  - Home: a fan of the three filled-form previews (titles only). On hover, focus or press, the left card tilts left, the right card tilts right and the centre card lifts; the centre always stays on top.
+  - ZP-PS: an index of the largest categories that links to each group.
+  - Sarpanch-Panch: a document stack showing only the icon and "40 PDF".
+  - RO guide: a procedure preview whose line draws in, with links to the sections.
+- **Section tracking (RO guide):** an IntersectionObserver whose root is a thin "reading line" just below the sticky bars. It is exact in both scroll directions and does not flicker at boundaries. A click marks the section at once and holds it during the smooth scroll.
+- **Accordions** (`lib/accordion.ts`): the FAQ and the guide's expandable blocks open and close in 420 ms (height, fade and a small slide), and the +/− marker flips immediately. With reduced motion they toggle instantly.
+- **"Go to Top"** (`BackToTop`, on every page): appears below the hero and scrolls the current page only, without touching the route, filters, search or view. The library's "back to search" button sits just above it.
+- **RO guide motion** (`lib/motion.ts`):
+  - The numbered procedures become scroll-synced timelines. The line fills with the reading position, and steps are marked done or active as you pass them. This runs in one requestAnimationFrame only while the timeline is near the viewport.
+  - Headings, tables and notes fade in once as they enter the viewport.
+  - Content is only ever hidden after JS confirms motion is allowed, and never if it starts on screen.
+- **RO guide:** compact hero, the official disclaimer in one visible callout, a sticky contents panel on desktop and a dropdown on mobile, and FAQs as accordions (`Accordion`). Procedures and legal tables stay open.
 
 ## Routes
 

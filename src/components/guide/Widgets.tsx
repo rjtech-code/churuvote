@@ -4,6 +4,7 @@ import { LETTERS, LETTER_CATEGORIES, REFERENCES } from '../../data/roGuide.gener
 import { useLanguage } from '../../i18n/LanguageProvider'
 import { checklist, faqGroups, letterCategory, s19Rows } from '../../lib/guide'
 import { SearchField } from '../SearchField'
+import { Accordion } from '../Accordion'
 
 const lc = (s: string) => s.toLowerCase()
 const frame = 'relative overflow-x-auto rounded-2xl border border-line bg-surface'
@@ -202,13 +203,9 @@ export function FAQSection() {
           <div key={x.n}>
             {(i === 0 || list[i - 1].group !== x.group) && <h3 className="!mb-2 !text-accent">{x.group}</h3>}
             {/* key includes whether a search is active, so items open while searching and close afterwards */}
-            <details key={`${x.n}-${!!needle}`} open={!!needle}>
-              <summary>
-                <span className="n">{x.n}</span>
-                <span>{x.question}</span>
-              </summary>
-              <div className="a">{x.answer}</div>
-            </details>
+            <Accordion key={`${x.n}-${!!needle}`} number={x.n} summary={x.question} defaultOpen={!!needle}>
+              {x.answer}
+            </Accordion>
           </div>
         ))}
       </div>

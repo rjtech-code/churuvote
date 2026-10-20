@@ -1,15 +1,37 @@
-import type { MouseEvent } from 'react'
+import { useEffect, useRef, type MouseEvent } from 'react'
 import { useLanguage } from '../../i18n/LanguageProvider'
+import { enhanceTimelines, revealOnScroll } from '../../lib/motion'
+import { toggleDetails } from '../../lib/accordion'
 
 /**
  * Renders a verbatim HTML fragment of the RO guide (bundled at build time from the source
- * and its translation, never user input). Handles the "copy" buttons, which copy the text
- * of the template whose id is in data-t.
+ * and its translation, never user input). Adds the scroll-synced timeline and gentle
+ * reveal effects on top of the static markup, and handles the "copy" buttons.
  */
 export function GuideHtml({ html }: { html: string }) {
   const { t } = useLanguage()
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const root = ref.current
+    if (!root) return
+    const stopTimelines = enhanceTimelines(root)
+    const blocks = Array.from(root.querySelectorAll(':scope > .tw, :scope > .note, :scope > .order, :scope > .grid > .card, :scope > .ladder > .rung, :scope > details'))
+    const stopReveal = revealOnScroll(blocks)
+    return () => {
+      stopTimelines()
+      stopReveal()
+    }
+  }, [html])
 
   const onClick = (e: MouseEvent<HTMLDivElement>) => {
+    // expandable blocks inside the guide get the same smooth accordion as the FAQ
+    const summary = (e.target as HTMLElement).closest('summary')
+    if (summary && summary.parentElement instanceof HTMLDetailsElement && ref.current?.contains(summary)) {
+      e.preventDefault()
+      toggleDetails(summary.parentElement)
+      return
+    }
     const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('button.copy')
     if (!btn) return
     const el = document.getElementById(btn.dataset.t ?? '')
@@ -31,5 +53,5 @@ export function GuideHtml({ html }: { html: string }) {
     else select()
   }
 
-  return <div className="ref" onClick={onClick} dangerouslySetInnerHTML={{ __html: html }} />
+  return <div ref={ref} className="ref" onClick={onClick} dangerouslySetInnerHTML={{ __html: html }} />
 }

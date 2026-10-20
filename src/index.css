@@ -8,15 +8,20 @@
   --c-page: #f7f8fc;
   --c-surface: #ffffff;
   --c-surface-2: #f1f4fa;
-  --c-ink: #252b3a;
+  --c-ink: #202a3a;
   --c-muted: #646c7c;
-  --c-line: #e6eaf1;
+  --c-line: #e5eaf2;
   --c-line-strong: #d3d9e5;
 
-  --c-accent: #3976d2;
+  --c-accent: #3470cb; /* same blue, a hair deeper so white text on it passes WCAG AA (4.85:1) */
   --c-accent-strong: #2b60b3;
   --c-accent-soft: #eaf1fc;
   --c-accent-ink: #ffffff;
+  --c-accent-2: #5d9ce8; /* lighter step of the same blue — decoration only, never under text */
+  --c-grad-from: #3470cb; /* gradients that carry white text: every stop ≥ 4.5:1 */
+  --c-grad-to: #24559f;
+  --c-accent-tint: #f3f7fe; /* palest blue, for tinted surfaces */
+  --c-glow: rgb(57 118 210 / 0.28);
   --c-teal: #73b7a5;
   --c-teal-soft: #e7f4f0;
   --c-teal-ink: #2c7563;
@@ -47,6 +52,11 @@
   --c-accent-strong: #93bbf6;
   --c-accent-soft: #1d2d4d;
   --c-accent-ink: #0d1526;
+  --c-accent-2: #94bdf7;
+  --c-grad-from: #94bdf7; /* dark text on these: ≥ 5.9:1 */
+  --c-grad-to: #5d93e6;
+  --c-accent-tint: #172238;
+  --c-glow: rgb(115 166 242 / 0.28);
   --c-teal: #7cc4b2;
   --c-teal-soft: #17302f;
   --c-teal-ink: #92d6c4;
@@ -74,6 +84,10 @@
   --color-accent-strong: var(--c-accent-strong);
   --color-accent-soft: var(--c-accent-soft);
   --color-accent-ink: var(--c-accent-ink);
+  --color-accent-2: var(--c-accent-2);
+  --color-grad-from: var(--c-grad-from);
+  --color-grad-to: var(--c-grad-to);
+  --color-accent-tint: var(--c-accent-tint);
   --color-teal: var(--c-teal);
   --color-teal-soft: var(--c-teal-soft);
   --color-teal-ink: var(--c-teal-ink);
@@ -100,7 +114,11 @@
     /* smooth colour change when the theme switches */
     body,
     .panel {
-      transition: background-color 200ms, border-color 200ms, color 200ms;
+      transition:
+        background-color 200ms,
+        border-color 200ms,
+        color 200ms,
+        box-shadow 300ms cubic-bezier(0.22, 1, 0.36, 1);
     }
   }
   body {
@@ -132,22 +150,67 @@
     @apply rounded-2xl border border-line bg-surface shadow-soft;
   }
   .btn-primary {
-    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-accent px-4 text-[0.95rem] font-semibold text-accent-ink shadow-sm transition-colors duration-150 hover:bg-accent-strong;
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 text-[0.95rem] font-semibold text-accent-ink;
+    background-image: linear-gradient(135deg, var(--c-grad-from), var(--c-grad-to));
+    background-size: 160% 160%;
+    background-position: 0% 50%;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.08), 0 6px 16px -8px var(--c-glow);
+    transition:
+      background-position 400ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 300ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .btn-primary:hover {
+    background-position: 100% 50%;
+    box-shadow: 0 2px 4px rgb(0 0 0 / 0.08), 0 12px 26px -10px var(--c-glow);
+    transform: translateY(-1px);
+  }
+  .btn-primary:active {
+    transform: translateY(0) scale(0.98);
   }
   .btn-soft {
-    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-accent-soft px-4 text-[0.95rem] font-semibold text-accent transition-colors duration-150 hover:bg-accent hover:text-accent-ink;
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-accent-soft px-4 text-[0.95rem] font-semibold text-accent;
+    transition:
+      background-color 200ms,
+      color 200ms,
+      box-shadow 300ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .btn-soft:hover {
+    @apply bg-accent text-accent-ink;
+    box-shadow: 0 10px 22px -12px var(--c-glow);
+    transform: translateY(-1px);
+  }
+  .btn-soft:active {
+    transform: translateY(0) scale(0.98);
+  }
+  .btn-primary svg,
+  .btn-soft svg {
+    transition: transform 250ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .btn-primary:hover svg.lucide-arrow-right,
+  .btn-soft:hover svg.lucide-arrow-right {
+    transform: translateX(3px);
   }
   .btn-ghost {
     @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-line-strong bg-surface px-4 text-[0.95rem] font-semibold text-ink transition-colors duration-150 hover:border-accent hover:text-accent;
   }
   .chip {
-    @apply inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3.5 text-sm font-medium transition-colors duration-150;
+    @apply inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3.5 text-sm font-medium transition-[background-color,border-color,color,box-shadow,transform] duration-200;
   }
   .chip-off {
     @apply border-line bg-surface text-ink hover:border-accent/50 hover:bg-accent-soft hover:text-accent;
   }
   .chip-on {
-    @apply border-accent bg-accent text-accent-ink shadow-sm;
+    @apply border-transparent text-accent-ink;
+    background-image: linear-gradient(135deg, var(--c-grad-from), var(--c-grad-to));
+    box-shadow: 0 6px 14px -8px var(--c-glow);
+  }
+  .text-gradient {
+    background-image: linear-gradient(120deg, var(--c-accent-strong), var(--c-accent) 50%, var(--c-accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
   .rule-tag {
     @apply inline-block rounded-md bg-accent-soft px-1.5 py-px font-mono text-[0.78em] whitespace-nowrap text-accent;
@@ -182,6 +245,282 @@
     .flash,
     .fade-in {
       animation: none;
+    }
+  }
+}
+
+/* ---------- 3D flip card (homepage categories only) ---------- */
+@layer components {
+  .flip {
+    perspective: 1200px;
+  }
+  .flip-inner {
+    display: grid; /* both faces share one cell, so the card is as tall as its taller face */
+    transform-style: preserve-3d;
+    transition: transform 600ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .flip.is-flipped .flip-inner {
+    transform: rotateY(180deg);
+  }
+  .flip-face {
+    grid-area: 1 / 1;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+  .flip-back {
+    transform: rotateY(180deg);
+  }
+  /* reduced motion: no rotation, a quick cross-fade instead */
+  @media (prefers-reduced-motion: reduce) {
+    .flip-inner,
+    .flip.is-flipped .flip-inner {
+      transform: none;
+      transition: none;
+    }
+    .flip-back {
+      transform: none;
+    }
+    .flip-face {
+      transition: opacity 150ms;
+    }
+    .flip:not(.is-flipped) .flip-back,
+    .flip.is-flipped .flip-front {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
+}
+
+/* ---------- scroll reveal (applied by lib/motion.ts only when motion is allowed) ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal-pending {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  .reveal-in {
+    transition:
+      opacity 450ms cubic-bezier(0.2, 0.7, 0.2, 1),
+      transform 450ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+}
+
+/* ---------- small hero visuals ---------- */
+@layer components {
+  @keyframes grow-x {
+    from {
+      transform: scaleX(0);
+    }
+  }
+  @keyframes draw-line {
+    from {
+      transform: scaleX(0);
+    }
+  }
+  @keyframes grow-y {
+    from {
+      transform: scaleY(0);
+    }
+  }
+  @keyframes pop-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px) scale(0.96);
+    }
+  }
+  .anim-grow-x {
+    transform-origin: left;
+    animation: grow-x 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .anim-draw-line {
+    transform-origin: left;
+    animation: draw-line 1100ms cubic-bezier(0.4, 0, 0.2, 1) 150ms both;
+  }
+  .anim-grow-y {
+    transform-origin: top;
+    animation: grow-y 1100ms cubic-bezier(0.4, 0, 0.2, 1) 150ms both;
+  }
+  .anim-pop-in {
+    animation: pop-in 450ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .list-fade {
+    animation: fade-in 220ms ease-out;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .anim-grow-x,
+    .anim-draw-line,
+    .anim-grow-y,
+    .anim-pop-in,
+    .list-fade {
+      animation: none;
+    }
+  }
+}
+
+/* ---------- homepage PDF fan (directional hover / focus / press) ---------- */
+@layer components {
+  @keyframes fade-only {
+    from {
+      opacity: 0;
+    }
+  }
+  .fan {
+    perspective: 1200px;
+  }
+  .fan-card {
+    --x: 0rem;
+    --y: 0rem;
+    --r: 0deg;
+    --ry: 0deg;
+    position: absolute;
+    transform: translateX(var(--x)) translateY(var(--y)) rotate(var(--r)) rotateY(var(--ry));
+    transition:
+      transform 500ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 500ms cubic-bezier(0.22, 1, 0.36, 1);
+    animation: fade-only 500ms ease-out both; /* opacity only, so it never fights the transform */
+    box-shadow: var(--c-shadow);
+  }
+  .fan-card[data-pos='left'] {
+    --x: -5.25rem;
+    --r: -7deg;
+    z-index: 1;
+  }
+  .fan-card[data-pos='center'] {
+    --y: -0.5rem;
+    z-index: 3; /* always above the side cards, even while they move */
+  }
+  .fan-card[data-pos='right'] {
+    --x: 5.25rem;
+    --r: 7deg;
+    z-index: 2;
+  }
+  .fan-card[data-pos='left']:is(:hover, :focus-visible, :active) {
+    --x: -6.75rem;
+    --r: -11deg;
+    --ry: 12deg;
+  }
+  .fan-card[data-pos='center']:is(:hover, :focus-visible, :active) {
+    --y: -1.4rem;
+  }
+  .fan-card[data-pos='right']:is(:hover, :focus-visible, :active) {
+    --x: 6.75rem;
+    --r: 11deg;
+    --ry: -12deg;
+  }
+  .fan-card {
+    box-shadow:
+      0 1px 2px rgb(0 0 0 / 0.06),
+      0 14px 30px -18px rgb(37 43 58 / 0.35);
+  }
+  .fan-card:is(:hover, :focus-visible, :active) {
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--c-accent) 35%, transparent),
+      0 24px 48px -18px var(--c-glow),
+      0 10px 24px -14px rgb(37 43 58 / 0.3);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .fan-card {
+      transition: none;
+      animation: none;
+    }
+  }
+}
+
+/* ---------- premium motion: entrances, ambient light, float, stagger ---------- */
+@layer components {
+  @keyframes enter-up {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+  }
+  @keyframes drift {
+    0% {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+    50% {
+      transform: translate3d(14px, -10px, 0) scale(1.06);
+    }
+    100% {
+      transform: translate3d(-10px, 8px, 0) scale(0.98);
+    }
+  }
+  @keyframes float-y {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-7px);
+    }
+  }
+  @keyframes ring-pulse {
+    from {
+      box-shadow: 0 0 0 0 var(--c-glow);
+    }
+    to {
+      box-shadow: 0 0 0 14px transparent;
+    }
+  }
+  @keyframes spin-in {
+    from {
+      opacity: 0;
+      transform: rotate(-90deg) scale(0.6);
+    }
+  }
+  /* hero entrance: children declare their order with --d (0, 1, 2 …) */
+  .enter {
+    animation: enter-up 620ms cubic-bezier(0.22, 1, 0.36, 1) backwards; /* backwards: hover/transition styles take over afterwards */
+    animation-delay: calc(var(--d, 0) * 70ms);
+  }
+  /* list entrance (document rows / cards, category cards): --i is capped by the component */
+  .stagger-item {
+    animation: enter-up 480ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    animation-delay: calc(var(--i, 0) * 35ms);
+  }
+  .ambient {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(48px);
+    pointer-events: none;
+    animation: drift 18s ease-in-out infinite alternate;
+  }
+  .float-y {
+    animation: float-y 7s ease-in-out infinite;
+  }
+  .spin-in {
+    animation: spin-in 360ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  /* thin blue light along the top edge of the header */
+  .header-glow::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--c-accent-2) 20%, var(--c-accent) 50%, var(--c-accent-2) 80%, transparent);
+    opacity: 0.7;
+  }
+  .icon-chip {
+    transition:
+      transform 300ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 300ms;
+  }
+  .group:hover .icon-chip,
+  .group:focus-within .icon-chip {
+    transform: translateY(-2px) scale(1.06);
+    box-shadow: 0 8px 18px -10px var(--c-glow);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .enter,
+    .stagger-item,
+    .ambient,
+    .float-y,
+    .spin-in {
+      animation: none;
+    }
+    .btn-primary:hover,
+    .btn-soft:hover,
+    .group:hover .icon-chip {
+      transform: none;
     }
   }
 }

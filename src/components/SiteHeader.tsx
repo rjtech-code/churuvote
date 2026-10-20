@@ -24,7 +24,10 @@ function isActive(to: string, pathname: string, hash: string) {
 
 export function LogoMark({ className = 'h-10 w-10 text-lg' }: { className?: string }) {
   return (
-    <span aria-hidden className={`grid shrink-0 place-items-center rounded-xl bg-accent font-bold text-accent-ink shadow-sm ${className}`}>
+    <span
+      aria-hidden
+      className={`grid shrink-0 place-items-center rounded-xl bg-gradient-to-br from-grad-from to-grad-to font-bold text-accent-ink shadow-[0_6px_16px_-8px_var(--c-glow)] transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-105 ${className}`}
+    >
       S
     </span>
   )
@@ -33,7 +36,7 @@ export function LogoMark({ className = 'h-10 w-10 text-lg' }: { className?: stri
 export function Identity() {
   const { t } = useLanguage()
   return (
-    <Link to="/" aria-label={t('site.home', { title: t('site.logo') })} className="flex min-w-0 items-center gap-3 rounded-xl">
+    <Link to="/" aria-label={t('site.home', { title: t('site.logo') })} className="group flex min-w-0 items-center gap-3 rounded-xl">
       <LogoMark />
       <span className="min-w-0 leading-tight">
         <span className="block truncate text-[0.95rem] font-bold tracking-tight text-ink sm:text-base">{t('site.logo')}</span>
@@ -82,7 +85,7 @@ export function SiteHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-surface/85 shadow-[0_1px_12px_-6px_rgb(0_0_0/0.12)] backdrop-blur-md">
+    <header className="header-glow sticky top-0 z-40 border-b border-line bg-surface/80 shadow-[0_8px_24px_-18px_var(--c-glow)] backdrop-blur-md backdrop-saturate-150">
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-lg focus:bg-accent focus:px-4 focus:py-2 focus:text-accent-ink"
@@ -102,11 +105,20 @@ export function SiteHeader() {
                     to={item.to}
                     onClick={() => onNav(item.to)}
                     aria-current={active ? 'page' : undefined}
-                    className={`rounded-full px-3.5 py-2 text-[0.93rem] font-semibold transition-colors duration-150 ${
-                      active ? 'bg-accent-soft text-accent' : 'text-muted hover:bg-surface-2 hover:text-ink'
+                    className={`relative inline-flex rounded-full px-3.5 py-2 text-[0.93rem] font-semibold transition-[background-color,color,box-shadow,transform] duration-200 active:scale-[0.97] ${
+                      active
+                        ? 'bg-gradient-to-b from-accent-soft to-accent-tint text-accent shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--c-accent)_22%,transparent)]'
+                        : 'text-muted hover:bg-surface-2 hover:text-ink'
                     }`}
                   >
                     {t(item.key)}
+                    {/* small indicator under the active page */}
+                    <span
+                      aria-hidden
+                      className={`absolute -bottom-[0.55rem] left-1/2 h-[3px] w-6 -translate-x-1/2 rounded-full bg-gradient-to-r from-accent-2 to-accent transition-[opacity,transform] duration-300 ${
+                        active ? 'scale-x-100 opacity-100' : 'scale-x-0 opacity-0'
+                      }`}
+                    />
                   </Link>
                 </li>
               )
@@ -130,7 +142,7 @@ export function SiteHeader() {
             aria-expanded={open}
             aria-controls="mobile-menu"
             aria-label={open ? t('nav.menuClose') : t('nav.menuOpen')}
-            className="grid h-10 w-10 place-items-center rounded-full bg-surface-2 text-ink transition-colors hover:bg-accent-soft hover:text-accent lg:hidden"
+            className="grid h-10 w-10 place-items-center rounded-full bg-surface-2 text-ink transition-[background-color,color,transform] duration-200 hover:bg-accent-soft hover:text-accent active:scale-95 lg:hidden"
           >
             {open ? <X className="h-5 w-5" aria-hidden /> : <Menu className="h-5 w-5" aria-hidden />}
           </button>
@@ -150,11 +162,11 @@ export function SiteHeader() {
                       to={item.to}
                       onClick={() => onNav(item.to)}
                       aria-current={active ? 'page' : undefined}
-                      className={`flex min-h-12 items-center gap-3 rounded-xl px-3 font-semibold transition-colors ${
-                        active ? 'bg-accent-soft text-accent' : 'text-ink hover:bg-surface-2'
+                      className={`group flex min-h-12 items-center gap-3 rounded-xl px-3 font-semibold transition-colors duration-200 ${
+                        active ? 'bg-gradient-to-r from-accent-soft to-accent-tint text-accent' : 'text-ink hover:bg-surface-2'
                       }`}
                     >
-                      <span className="grid h-8 w-8 place-items-center rounded-lg bg-surface-2 text-muted">
+                      <span className="icon-chip grid h-8 w-8 place-items-center rounded-lg bg-surface-2 text-muted group-hover:text-accent">
                         {Icon ? <Icon className="h-4 w-4" aria-hidden /> : <span className="text-sm font-bold">S</span>}
                       </span>
                       {t(item.key)}

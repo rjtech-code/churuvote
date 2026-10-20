@@ -1,5 +1,8 @@
-import { ArrowRight, ChevronRight, Scale } from 'lucide-react'
+import { useEffect, useRef } from 'react'
+import { ArrowRight, Scale } from 'lucide-react'
 import { Link } from 'react-router'
+import { CompactHero } from '../components/CompactHero'
+import { ProcedurePreviewVisual } from '../components/HeroVisuals'
 import { SectionNav } from '../components/SectionNav'
 import { GuideHtml } from '../components/guide/GuideHtml'
 import { Checklist, FAQSection, LegalTable, LettersTable, S19Table } from '../components/guide/Widgets'
@@ -7,6 +10,10 @@ import type { GuideWidget } from '../data/types'
 import { useLanguage } from '../i18n/LanguageProvider'
 import { usePageMeta } from '../i18n/usePageMeta'
 import { faqCount, guideSections, sourceNote } from '../lib/guide'
+import { revealOnScroll } from '../lib/motion'
+
+/** Sections shown in the hero's procedure preview (existing section ids, in procedure order). */
+const PREVIEW_STEPS = ['nomination', 'scrutiny', 'final', 'symbol']
 
 const WIDGETS: Record<GuideWidget, () => React.JSX.Element> = {
   s19: S19Table,
@@ -22,6 +29,15 @@ export function RoGuide() {
   const sections = guideSections(lang)
   const items = sections.map((s) => ({ id: s.id, label: s.navLabel }))
   const translationNote = t('guide.translationNote')
+  const previewSteps = PREVIEW_STEPS.map((id) => items.find((i) => i.id === id)).filter((i): i is { id: string; label: string } => !!i)
+
+  // section headings fade in once as they scroll into view
+  const articleRef = useRef<HTMLElement>(null)
+  useEffect(() => {
+    const root = articleRef.current
+    if (!root) return
+    return revealOnScroll(Array.from(root.querySelectorAll(':scope > section > div:first-child')))
+  }, [lang])
 
   const jumps = [
     { id: 'process', label: t('guide.jump.process') },
@@ -32,70 +48,58 @@ export function RoGuide() {
 
   return (
     <>
-      <section className="container-page pt-8 sm:pt-10">
-        <nav aria-label={t('el.crumb')} className="flex items-center gap-1 text-sm text-muted">
-          <Link to="/" className="rounded-md transition-colors hover:text-accent">
-            {t('nav.home')}
-          </Link>
-          <ChevronRight className="h-3.5 w-3.5" aria-hidden />
-          <span aria-current="page" className="font-semibold text-ink">
-            {t('nav.guide')}
-          </span>
-        </nav>
-        <span className="kicker mt-4">{t('guide.kicker')}</span>
-        <h1 className="mt-3 max-w-4xl text-3xl font-bold sm:text-4xl">{t('guide.title')}</h1>
-        <p className="mt-3 max-w-3xl text-lg text-muted">{t('guide.lede')}</p>
-        <div className="mt-5 flex flex-wrap gap-2.5">
-          {jumps.map((j, i) => (
-            <a key={j.id} href={`#${j.id}`} className={i === 0 ? 'btn-primary' : 'btn-soft'}>
-              {j.label}
-              {i === 0 && <ArrowRight className="h-4 w-4" aria-hidden />}
-            </a>
-          ))}
-        </div>
+      <CompactHero
+        crumb={t('nav.guide')}
+        title={t('guide.title')}
+        description={t('guide.lede')}
+        visual={<ProcedurePreviewVisual steps={previewSteps} />}
+        actions={jumps.map((j, i) => (
+          <a key={j.id} href={`#${j.id}`} className={i === 0 ? 'btn-primary' : 'btn-soft'}>
+            {j.label}
+            {i === 0 && <ArrowRight className="h-4 w-4" aria-hidden />}
+          </a>
+        ))}
+      />
 
-        {/* source and disclaimer */}
-        <div className="mt-6 grid gap-3 md:grid-cols-[1fr_1.25fr]">
-          <div className="rounded-2xl bg-surface-2 p-4 text-[0.93rem]">
-            <p>
-              <b>{t('guide.meta.guidance')}</b> {t('guide.meta.guidanceValue')}
-            </p>
-            <p className="mt-2 text-muted">
-              <b className="text-ink">{t('guide.meta.basis')}</b> <span dangerouslySetInnerHTML={{ __html: t('guide.meta.basisValue') }} />
-            </p>
-          </div>
-          <div className="flex gap-3 rounded-2xl bg-bad-soft p-4 text-[0.93rem]">
-            <Scale className="mt-0.5 h-5 w-5 shrink-0 text-bad" aria-hidden />
+      {/* source + official disclaimer: kept visible, as one compact callout */}
+      <div className="container-page pt-6">
+        <div className="flex gap-3 rounded-2xl bg-bad-soft p-4 text-sm">
+          <Scale className="mt-0.5 h-5 w-5 shrink-0 text-bad" aria-hidden />
+          <div className="grid gap-1.5">
             <p>
               <b className="text-bad">{t('guide.meta.status')}</b> <span dangerouslySetInnerHTML={{ __html: t('guide.meta.statusValue') }} />
             </p>
+            <p className="text-muted">
+              <b className="text-ink">{t('guide.meta.basis')}</b> <span dangerouslySetInnerHTML={{ __html: t('guide.meta.basisValue') }} />{' '}
+              <b className="text-ink">{t('guide.meta.guidance')}</b> {t('guide.meta.guidanceValue')}
+            </p>
+            {translationNote && <p className="text-muted">{translationNote}</p>}
           </div>
         </div>
-        {translationNote && <p className="mt-3 rounded-2xl bg-warn-soft p-4 text-sm">{translationNote}</p>}
-      </section>
+      </div>
 
       <div className="container-page mt-6 lg:mt-10">
         <div className="lg:hidden">
           <SectionNav items={items} variant="dropdown" />
         </div>
-        <div className="grid gap-10 lg:grid-cols-[15rem_minmax(0,1fr)]">
+        <div className="grid gap-10 lg:grid-cols-[14rem_minmax(0,1fr)]">
           <div className="hidden lg:block">
             <SectionNav items={items} variant="sidebar" />
           </div>
 
-          <article className="min-w-0">
+          <article ref={articleRef} className="min-w-0">
             {sections.map((s, idx) => (
               <section key={s.id} id={s.id} aria-labelledby={`${s.id}-h`} className="scroll-mt-36 pb-10 outline-none lg:scroll-mt-24">
                 <div className={`flex items-start gap-3 ${idx ? 'border-t border-line pt-8' : ''}`}>
-                  <span aria-hidden className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-accent-soft text-sm font-bold text-accent tabular-nums">
+                  <span aria-hidden className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-gradient-to-br from-grad-from to-grad-to text-sm font-bold text-accent-ink tabular-nums shadow-[0_6px_14px_-8px_var(--c-glow)]">
                     {idx + 1}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <h2 id={`${s.id}-h`} className="text-2xl font-bold leading-snug">
+                    <h2 id={`${s.id}-h`} className="text-xl font-bold leading-snug sm:text-2xl">
                       {s.title}
                     </h2>
                     {s.tags.length > 0 && (
-                      <p className="mt-2 flex flex-wrap gap-1.5">
+                      <p className="mt-1.5 flex flex-wrap gap-1.5">
                         {s.tags.map((tag) => (
                           <span key={tag} className="rule-tag">
                             {tag}
@@ -115,16 +119,13 @@ export function RoGuide() {
               </section>
             ))}
 
-            <div className="panel flex flex-wrap items-center justify-between gap-4 p-5">
-              <p>
-                <b className="block text-lg">{t('guide.back.title')}</b>
-                <small className="text-muted">{t('guide.back.text')}</small>
-              </p>
-              <div className="flex flex-wrap gap-2.5">
-                <Link to="/" className="btn-primary">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-surface p-4">
+              <p className="font-semibold">{t('guide.back.title')}</p>
+              <div className="flex flex-wrap gap-2">
+                <Link to="/" className="btn-primary min-h-10 text-sm">
                   {t('guide.back.home')}
                 </Link>
-                <Link to="/#files" className="btn-soft">
+                <Link to="/#files" className="btn-soft min-h-10 text-sm">
                   {t('guide.back.files')}
                   <ArrowRight className="h-4 w-4" aria-hidden />
                 </Link>

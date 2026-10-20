@@ -18,16 +18,15 @@
       rel="stylesheet"
     />
     <script>
-      // Apply the saved theme (or the system theme) and language before first paint.
+      // Apply the saved theme (light by default) and language before first paint.
       (function () {
         var theme = null;
         try {
           theme = localStorage.getItem('chunav-theme');
           if (localStorage.getItem('chunav-lang') === 'en') document.documentElement.lang = 'en';
         } catch (e) {}
-        if (!theme) {
-          theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        }
+        // Light is the default; dark only after the visitor explicitly chooses it.
+        if (theme !== 'dark') theme = 'light';
         if (theme === 'dark') document.documentElement.classList.add('dark');
       })();
     </script>
