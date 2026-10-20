@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 
 export type Theme = 'light' | 'dark'
-const STORAGE_KEY = 'chunav-theme'
+/** Explicit user choice only (see index.html: the old auto-written 'chunav-theme' key is ignored). */
+const STORAGE_KEY = 'chunav-theme-choice'
 
 interface ThemeContextValue {
   theme: Theme
@@ -19,6 +20,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#0F1626' : '#F7F8FC')
   }, [theme])
 
   // Only an explicit choice is saved, so first-time visitors always start in light mode.

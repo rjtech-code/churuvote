@@ -34,7 +34,7 @@ function useShare(doc: DocItem) {
 }
 
 const iconBtn =
-  'grid h-9 w-9 place-items-center rounded-lg text-muted transition-colors duration-150 hover:bg-accent-soft hover:text-accent'
+  'grid h-11 w-11 place-items-center rounded-lg text-muted md:h-9 md:w-9 transition-colors duration-150 hover:bg-accent-soft hover:text-accent'
 
 /** Compact actions: labelled Open, icon-only Download and Share (with accessible names and tooltips). */
 export function DocumentActions({ doc, title, compact = false }: { doc: DocItem; title: string; compact?: boolean }) {
@@ -49,7 +49,7 @@ export function DocumentActions({ doc, title, compact = false }: { doc: DocItem;
           href={doc.fileUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="mr-1 inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-accent-soft px-3 text-sm font-semibold text-accent transition-colors duration-150 hover:bg-accent hover:text-accent-ink"
+          className="mr-1 inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-accent-soft px-3.5 md:min-h-9 md:px-3 text-sm font-semibold text-accent transition-colors duration-150 hover:bg-accent hover:text-accent-ink"
         >
           <ExternalLink className="h-3.5 w-3.5" aria-hidden />
           {t('reg.open')}

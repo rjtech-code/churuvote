@@ -26,6 +26,7 @@ export function Home() {
         eyebrow={t('home.kicker')}
         title={t('home.title')}
         visual={<DocumentFanVisual />}
+        visualPlacement="afterTitle"
         description={t('home.lede')}
         meta={
           <StatRow

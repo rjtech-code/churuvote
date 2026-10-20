@@ -8,8 +8,8 @@
       name="description"
       content="जिला परिषद, पंचायत समिति तथा सरपंच-पंच चुनाव 2026 (राजस्थान) से संबंधित प्रशिक्षण PPT, भरे हुए प्रपत्र, चेकलिस्ट, आदेश, परिपत्र और RO संवीक्षा मार्गदर्शिका।"
     />
-    <meta name="theme-color" content="#F7F8FC" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0F1626" media="(prefers-color-scheme: dark)" />
+    <!-- browser UI colour follows the site theme (light by default), not the device setting -->
+    <meta name="theme-color" content="#F7F8FC" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -20,14 +20,21 @@
     <script>
       // Apply the saved theme (light by default) and language before first paint.
       (function () {
+        // Only an explicit choice is stored, under 'chunav-theme-choice'. The old 'chunav-theme'
+        // key was written automatically by earlier builds (often from a dark OS setting), so it
+        // is ignored and removed: every visitor without an explicit choice starts in light mode.
         var theme = null;
         try {
-          theme = localStorage.getItem('chunav-theme');
+          localStorage.removeItem('chunav-theme');
+          theme = localStorage.getItem('chunav-theme-choice');
           if (localStorage.getItem('chunav-lang') === 'en') document.documentElement.lang = 'en';
         } catch (e) {}
         // Light is the default; dark only after the visitor explicitly chooses it.
         if (theme !== 'dark') theme = 'light';
-        if (theme === 'dark') document.documentElement.classList.add('dark');
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0F1626');
+        }
       })();
     </script>
   </head>

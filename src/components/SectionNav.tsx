@@ -128,7 +128,14 @@ export function SectionNav({ items, variant }: { items: Item[]; variant: 'sideba
     const ro = typeof ResizeObserver !== 'undefined' && listRef.current ? new ResizeObserver(measure) : null
     if (ro && listRef.current) ro.observe(listRef.current)
     document.fonts?.ready.then(measure).catch(() => {})
-    return () => ro?.disconnect()
+    // and once more after the state change has fully settled (font-weight swap, smooth scroll end)
+    const settle = window.setTimeout(measure, 450)
+    window.addEventListener('scrollend', measure)
+    return () => {
+      ro?.disconnect()
+      clearTimeout(settle)
+      window.removeEventListener('scrollend', measure)
+    }
   }, [active, variant, items])
 
   useEffect(() => {

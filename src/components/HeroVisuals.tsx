@@ -3,6 +3,7 @@
  * (thumbnails, counts, section names), never stock imagery. Decorative parts are
  * aria-hidden; anything clickable is a real link with an accessible name.
  */
+import { useEffect, useRef, useState, type MouseEvent, type PointerEvent } from 'react'
 import { FileText } from 'lucide-react'
 import { DOC_SECTIONS, FEATURED_FORMS } from '../data/documents.generated'
 import type { ElectionKey } from '../data/types'
@@ -15,14 +16,40 @@ import { groupAnchor } from './DocumentBrowser'
  * original order. Hover / keyboard focus / press: the left card tilts further left, the
  * right card further right, the centre card lifts — side cards always stay beneath the
  * centre card (see .fan-card in index.css). Each card is the document's own link.
+ * Touch: the first tap emphasises a card (same motion as hover), a second tap opens it;
+ * tapping anywhere else clears the emphasis. Mouse clicks and keyboard open directly.
  */
 export function DocumentFanVisual() {
   const { t, lang } = useLanguage()
   const docs = FEATURED_FORMS.map((id) => DOC_BY_ID[id]).filter((d) => d.available && d.thumbnailUrl)
   const positions = ['left', 'center', 'right'] as const
+  const [active, setActive] = useState<string | null>(null)
+  const pointer = useRef('mouse')
+  const boxRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!active) return
+    const clear = (e: Event) => {
+      if (!boxRef.current?.contains(e.target as Node)) setActive(null)
+    }
+    document.addEventListener('pointerdown', clear)
+    return () => document.removeEventListener('pointerdown', clear)
+  }, [active])
+
+  const onPointerDown = (e: PointerEvent) => {
+    pointer.current = e.pointerType
+  }
+  const onClick = (e: MouseEvent, id: string) => {
+    if (pointer.current !== 'mouse' && active !== id) {
+      e.preventDefault()
+      setActive(id)
+    }
+    pointer.current = 'mouse'
+  }
+
   return (
-    <div role="group" aria-label={t('visual.docPreviews')} className="relative mx-auto hidden h-72 w-full max-w-[25rem] md:block">
-      <span aria-hidden className="absolute top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,var(--c-accent-soft)_0%,transparent_70%)]" />
+    <div ref={boxRef} role="group" aria-label={t('visual.docPreviews')} className="fan-box relative mx-auto h-60 w-full max-w-[25rem] sm:h-64 md:h-72">
+      <span aria-hidden className="absolute top-1/2 left-1/2 h-56 w-56 sm:h-64 sm:w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,var(--c-accent-soft)_0%,transparent_70%)]" />
       <span aria-hidden className="absolute inset-x-10 bottom-2 h-6 rounded-full bg-accent/15 blur-xl" />
       <div className="fan float-y absolute inset-0 flex items-center justify-center">
       {docs.slice(0, 3).map((d, i) => {
@@ -34,11 +61,14 @@ export function DocumentFanVisual() {
             target="_blank"
             rel="noopener noreferrer"
             data-pos={positions[i]}
+            data-active={active === d.id ? '' : undefined}
+            onPointerDown={onPointerDown}
+            onClick={(e) => onClick(e, d.id)}
             style={{ animationDelay: `${i * 90}ms` }}
-            className="fan-card w-40 overflow-hidden rounded-xl border border-line bg-surface outline-offset-4"
+            className="fan-card w-28 overflow-hidden rounded-xl border border-line bg-surface outline-offset-4 [-webkit-tap-highlight-color:transparent] sm:w-36 md:w-40"
           >
-            <img src={d.thumbnailUrl} alt="" className="h-48 w-full object-cover object-top" />
-            <span className="line-clamp-2 border-t border-line px-2.5 py-1.5 text-[0.72rem] leading-snug font-semibold text-ink">{title}</span>
+            <img src={d.thumbnailUrl} alt="" className="h-36 w-full object-cover object-top sm:h-44 md:h-48" />
+            <span className="line-clamp-2 border-t border-line px-2 py-1.5 text-[0.68rem] leading-snug font-semibold text-ink sm:px-2.5 sm:text-[0.72rem]">{title}</span>
             <span className="sr-only">{t('common.newTab')}</span>
           </a>
         )
@@ -83,7 +113,7 @@ export function CategoryIndexVisual({ page }: { page: ElectionKey }) {
 /** Sarpanch-Panch: a miniature document stack — icon and "40 PDF" only. */
 export function DocumentStackVisual({ files }: { files: number }) {
   return (
-    <div aria-hidden className="float-y relative mx-auto hidden h-48 w-44 md:block">
+    <div aria-hidden className="float-y relative mx-auto h-40 w-36 sm:h-48 sm:w-44">
       <span className="absolute inset-0 translate-x-6 -translate-y-3 rotate-6 rounded-2xl border border-line bg-teal-soft" />
       <span className="absolute inset-0 translate-x-3 -translate-y-1.5 rotate-3 rounded-2xl border border-line bg-surface-2" />
       <span className="anim-pop-in absolute inset-0 flex flex-col rounded-2xl border border-line bg-gradient-to-br from-surface to-accent-tint p-4 shadow-[0_18px_40px_-20px_var(--c-glow)]">
@@ -91,7 +121,7 @@ export function DocumentStackVisual({ files }: { files: number }) {
           <FileText className="h-5 w-5" />
         </span>
         <span className="stack-figure mt-4 flex items-baseline gap-1.5">
-          <span className="text-gradient text-4xl font-bold tabular-nums">{files}</span>
+          <span className="text-gradient text-3xl font-bold tabular-nums sm:text-4xl">{files}</span>
           <span className="text-lg font-bold text-muted">PDF</span>
         </span>
         <span className="mt-auto grid gap-1.5">

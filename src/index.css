@@ -366,6 +366,15 @@
   .fan {
     perspective: 1200px;
   }
+  /* spread of the side cards follows the available width: as wide as fits on phones
+     (nothing clips at 320px, side titles stay as visible as possible), capped on desktop */
+  .fan-box {
+    container-type: inline-size;
+  }
+  .fan {
+    --off: clamp(3.4rem, 50cqw - 5.25rem, 5.25rem);
+    --off-on: clamp(4.2rem, 50cqw - 4.4rem, 6.75rem);
+  }
   .fan-card {
     --x: 0rem;
     --y: 0rem;
@@ -380,7 +389,7 @@
     box-shadow: var(--c-shadow);
   }
   .fan-card[data-pos='left'] {
-    --x: -5.25rem;
+    --x: calc(var(--off) * -1);
     --r: -7deg;
     z-index: 1;
   }
@@ -389,29 +398,51 @@
     z-index: 3; /* always above the side cards, even while they move */
   }
   .fan-card[data-pos='right'] {
-    --x: 5.25rem;
+    --x: var(--off);
     --r: 7deg;
     z-index: 2;
   }
-  .fan-card[data-pos='left']:is(:hover, :focus-visible, :active) {
-    --x: -6.75rem;
+  /* emphasis: mouse hover (hover-capable devices only), keyboard focus, or the first tap on touch (data-active) */
+  .fan-card[data-pos='left']:is(:focus-visible, [data-active]) {
+    --x: calc(var(--off-on) * -1);
     --r: -11deg;
     --ry: 12deg;
   }
-  .fan-card[data-pos='center']:is(:hover, :focus-visible, :active) {
+  .fan-card[data-pos='center']:is(:focus-visible, [data-active]) {
     --y: -1.4rem;
   }
-  .fan-card[data-pos='right']:is(:hover, :focus-visible, :active) {
-    --x: 6.75rem;
+  .fan-card[data-pos='right']:is(:focus-visible, [data-active]) {
+    --x: var(--off-on);
     --r: 11deg;
     --ry: -12deg;
+  }
+  @media (hover: hover) {
+    .fan-card[data-pos='left']:is(:hover, :active) {
+      --x: calc(var(--off-on) * -1);
+      --r: -11deg;
+      --ry: 12deg;
+    }
+    .fan-card[data-pos='center']:is(:hover, :active) {
+      --y: -1.4rem;
+    }
+    .fan-card[data-pos='right']:is(:hover, :active) {
+      --x: var(--off-on);
+      --r: 11deg;
+      --ry: -12deg;
+    }
+    .fan-card:is(:hover, :active) {
+      box-shadow:
+        0 0 0 1px color-mix(in srgb, var(--c-accent) 35%, transparent),
+        0 24px 48px -18px var(--c-glow),
+        0 10px 24px -14px rgb(37 43 58 / 0.3);
+    }
   }
   .fan-card {
     box-shadow:
       0 1px 2px rgb(0 0 0 / 0.06),
       0 14px 30px -18px rgb(37 43 58 / 0.35);
   }
-  .fan-card:is(:hover, :focus-visible, :active) {
+  .fan-card:is(:focus-visible, [data-active]) {
     box-shadow:
       0 0 0 1px color-mix(in srgb, var(--c-accent) 35%, transparent),
       0 24px 48px -18px var(--c-glow),
@@ -521,6 +552,56 @@
     .btn-soft:hover,
     .group:hover .icon-chip {
       transform: none;
+    }
+  }
+}
+
+/* ---------- mobile menu: overlay panel, staggered links, animated open and close ---------- */
+@layer components {
+  .menu-panel,
+  .menu-backdrop,
+  .menu-item {
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .menu-backdrop {
+    opacity: 0;
+    transition-property: opacity;
+    transition-duration: 420ms;
+  }
+  .menu-backdrop[data-state='open'] {
+    opacity: 1;
+  }
+  .menu-panel {
+    opacity: 0;
+    translate: 0 -0.75rem;
+    transition-property: opacity, translate;
+    transition-duration: 420ms;
+  }
+  .menu-panel[data-state='open'] {
+    opacity: 1;
+    translate: 0 0;
+  }
+  .menu-panel[data-state='closed'],
+  .menu-backdrop[data-state='closed'] {
+    transition-duration: 300ms;
+  }
+  .menu-item {
+    opacity: 0;
+    translate: 0 -0.5rem;
+    transition-property: opacity, translate;
+    transition-duration: 380ms;
+  }
+  [data-state='open'] .menu-item {
+    opacity: 1;
+    translate: 0 0;
+    transition-delay: calc(60ms + var(--i, 0) * 45ms);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .menu-panel,
+    .menu-backdrop,
+    .menu-item {
+      transition: none;
+      translate: none;
     }
   }
 }

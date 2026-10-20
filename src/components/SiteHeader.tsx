@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { Link, useLocation } from 'react-router'
 import { BookOpenCheck, FolderOpen, Landmark, Menu, Users, X, type LucideIcon } from 'lucide-react'
 import { useLanguage } from '../i18n/LanguageProvider'
@@ -62,18 +62,46 @@ export function SiteHeader() {
   const { t } = useLanguage()
   const { pathname, hash, key } = useLocation()
   const [open, setOpen] = useState(false)
-  const panelRef = useRef<HTMLDivElement>(null)
+  // the menu stays mounted while its closing animation plays, then unmounts
+  const [rendered, setRendered] = useState(false)
+  const [shown, setShown] = useState(false)
+  const buttonRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => setOpen(false), [key])
+
+  useEffect(() => {
+    if (open) {
+      setRendered(true)
+      // next frame, so the panel starts from its closed state and transitions in
+      const raf = requestAnimationFrame(() => requestAnimationFrame(() => setShown(true)))
+      return () => cancelAnimationFrame(raf)
+    }
+    setShown(false)
+    const done = window.setTimeout(() => setRendered(false), 340)
+    return () => clearTimeout(done)
+  }, [open])
+
   useEffect(() => {
     if (!open) return
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      setOpen(false)
+      buttonRef.current?.focus()
+    }
     const onResize = () => window.innerWidth >= 1024 && setOpen(false)
     window.addEventListener('keydown', onKey)
     window.addEventListener('resize', onResize)
+    // lock page scroll behind the overlay, keeping the scrollbar's space so nothing shifts
+    const root = document.documentElement
+    const gap = window.innerWidth - root.clientWidth
+    const prev = { overflow: root.style.overflow, pad: root.style.paddingRight }
+    root.style.overflow = 'hidden'
+    if (gap > 0) root.style.paddingRight = `${gap}px`
     return () => {
       window.removeEventListener('keydown', onKey)
       window.removeEventListener('resize', onResize)
+      root.style.overflow = prev.overflow
+      root.style.paddingRight = prev.pad
     }
   }, [open])
 
@@ -130,13 +158,15 @@ export function SiteHeader() {
           <div className="hidden sm:block">
             <LanguageToggle />
           </div>
-          <div className="sm:hidden">
+          {/* below 360px the language switch moves into the menu */}
+          <div className="hidden min-[360px]:block sm:hidden">
             <LanguageToggle compact />
           </div>
           <div className="hidden sm:block">
             <ThemeToggle />
           </div>
           <button
+            ref={buttonRef}
             type="button"
             onClick={() => setOpen((o) => !o)}
             aria-expanded={open}
@@ -144,20 +174,31 @@ export function SiteHeader() {
             aria-label={open ? t('nav.menuClose') : t('nav.menuOpen')}
             className="grid h-10 w-10 place-items-center rounded-full bg-surface-2 text-ink transition-[background-color,color,transform] duration-200 hover:bg-accent-soft hover:text-accent active:scale-95 lg:hidden"
           >
-            {open ? <X className="h-5 w-5" aria-hidden /> : <Menu className="h-5 w-5" aria-hidden />}
+            <span key={open ? 'x' : 'menu'} className="spin-in grid place-items-center">
+              {open ? <X className="h-5 w-5" aria-hidden /> : <Menu className="h-5 w-5" aria-hidden />}
+            </span>
           </button>
         </div>
       </div>
 
-      {open && (
-        <div ref={panelRef} id="mobile-menu" className="fade-in border-t border-line bg-surface lg:hidden">
+      {rendered && (
+        <>
+          {/* overlay below the bar: tapping it closes the menu (positioned inside the header,
+              whose backdrop-filter makes it the containing block) */}
+          <div aria-hidden data-state={shown ? 'open' : 'closed'} onClick={() => setOpen(false)} className="menu-backdrop absolute inset-x-0 top-full h-[100dvh] bg-ink/25 lg:hidden" />
+          <div
+            id="mobile-menu"
+            data-state={shown ? 'open' : 'closed'}
+            inert={!open}
+            className="menu-panel absolute inset-x-0 top-full max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain border-y border-line bg-surface shadow-[0_24px_40px_-24px_var(--c-glow)] lg:hidden"
+          >
           <nav aria-label={t('nav.mobileLabel')} className="container-page py-3">
             <ul className="grid gap-1">
-              {[{ key: 'nav.home' as TranslationKey, to: '/', icon: null }, ...NAV_ITEMS].map((item) => {
+              {[{ key: 'nav.home' as TranslationKey, to: '/', icon: null }, ...NAV_ITEMS].map((item, i) => {
                 const active = item.to === '/' ? pathname === '/' && hash !== '#files' : isActive(item.to, pathname, hash)
                 const Icon = item.icon
                 return (
-                  <li key={item.to}>
+                  <li key={item.to} className="menu-item" style={{ '--i': i } as CSSProperties}>
                     <Link
                       to={item.to}
                       onClick={() => onNav(item.to)}
@@ -175,13 +216,18 @@ export function SiteHeader() {
                 )
               })}
             </ul>
-            {/* on the smallest screens the theme switch lives here instead of the bar */}
-            <div className="mt-2 flex items-center justify-between rounded-xl bg-surface-2 px-3 py-2 sm:hidden">
+            {/* on the smallest screens the language and theme switches live here instead of the bar */}
+            <div className="menu-item mt-2 flex items-center justify-between gap-3 rounded-xl bg-surface-2 px-3 py-2 min-[360px]:hidden" style={{ '--i': 5 } as CSSProperties}>
+              <span className="text-sm font-semibold text-muted">{t('util.language')}</span>
+              <LanguageToggle compact />
+            </div>
+            <div className="menu-item mt-2 flex items-center justify-between rounded-xl bg-surface-2 px-3 py-2 sm:hidden" style={{ '--i': 6 } as CSSProperties}>
               <span className="text-sm font-semibold text-muted">{t('util.theme')}</span>
               <ThemeToggle />
             </div>
           </nav>
-        </div>
+          </div>
+        </>
       )}
     </header>
   )
